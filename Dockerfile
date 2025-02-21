@@ -2,16 +2,21 @@ FROM nginx:alpine
 
 # support running as arbitrary user which belogs to the root group
 RUN chmod g+rwx /var/cache/nginx /var/run /var/log/nginx && \
-    chown nginx.root /var/cache/nginx /var/run /var/log/nginx && \
+    chown nginx:root /var/cache/nginx /var/run /var/log/nginx && \
+    # make it possible for nginx user to replace default.conf when launched
+    chmod -R g+rwX /etc/nginx/conf.d && \
+    chown -R nginx:root /etc/nginx/conf.d && \
     # comment user directive as master process is run as user in OpenShift
-    sed -i.bak 's/^user/#user/' /etc/nginx/nginx.conf && \
-    # Create the htpasswd
-    apk add apache2-utils && \
-    htpasswd -cb /etc/nginx/htpasswd admin admin1041
+    # comment server_names_hash_bucket_size if set (sould not be in current image)
+    # then add it and set to 128 to support the long hostnames given by Rahti
+    sed -i.bak -e 's/^user/#user/' \
+               -e 's/^(\s*)server_names_hash_bucket_size/\1# server_names_hash_bucket_size/' \
+               -e 's/http {/http {\n    server_names_hash_bucket_size 128;/' \
+               /etc/nginx/nginx.conf
 
-COPY default.conf /etc/nginx/conf.d/
+COPY default.conf.template /etc/nginx/templates/
 
 WORKDIR /usr/share/nginx/html/
-EXPOSE 8081
+EXPOSE 8080
 
 USER nginx:root

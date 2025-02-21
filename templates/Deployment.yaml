@@ -2,13 +2,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: python-and-sidecar
-  name: python-and-sidecar
+    app: sensorhub-nginx-deployment
+  name: sensorhub-nginx-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: python-and-sidecar
+      app: sensorhub-nginx-deployment
   strategy:
     activeDeadlineSeconds: 21600
     resources: {}
@@ -22,27 +22,30 @@ spec:
   template:
     metadata:
       labels:
-        app: python-and-sidecar
-        deploymentconfig: python-and-sidecar
+        app: sensorhub-nginx-deployment
+        deploymentconfig: sensorhub-nginx-deployment
     spec:
       containers:
-      - image: docker.io/cscfi/nginx-sidecar:latest
+      - image: docker.io/mioja/sensorhub-nginx:latest
         imagePullPolicy: Always
         name: nginx
         ports:
-        - containerPort: 8081
+        - containerPort: 8080
           protocol: TCP
+        env:
+        - name: HOSTNAME
+          value: sensorhub-test-pwp-deploy-tests.2.rahtiapp.fi
         resources:
           limits:
             cpu: 500m
             memory: 1Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
-      - image: cscfi/hello-world-opensift:latest
+      - image: docker.io/mioja/sensorhub:latest
         imagePullPolicy: Always
-        name: python
+        name: sensorhub
         ports:
-        - containerPort: 8080
+        - containerPort: 8000
           protocol: TCP
         resources:
           limits:

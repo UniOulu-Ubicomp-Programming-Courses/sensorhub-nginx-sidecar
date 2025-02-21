@@ -1,0 +1,12 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: sensorhub-configmap
+data:
+  config.py: |-
+    import os
+    SECRET_KEY = os.environ.pop("FLASK_SECRET_KEY")
+    SQLALCHEMY_DATABASE_URI = (
+        f"postgresql://{os.environ.pop("DB_USER")}:{os.environ.pop("DB_PASS")}@"
+        f"{os.environ.pop("DB_HOST")}/{os.environ.pop("DB_NAME")}"
+    )
