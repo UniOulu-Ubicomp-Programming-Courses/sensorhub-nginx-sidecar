@@ -34,7 +34,7 @@ spec:
           protocol: TCP
         env:
         - name: HOSTNAME
-          value: sensorhub-test-pwp-deploy-tests.2.rahtiapp.fi
+          value: localhost
         resources:
           limits:
             cpu: 500m
